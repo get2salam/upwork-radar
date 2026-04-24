@@ -11,9 +11,9 @@
     <div class="shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Local-first micro app</p>
+          <p class="eyebrow">Freelance opportunity operating system</p>
           <h1>Upwork Radar</h1>
-          <p class="lede">Scan, score, and shortlist freelance opportunities that fit your edge.</p>
+          <p class="lede">Score promising gigs, track deadlines, and shape a stronger pitch before you burn time on the wrong opportunities.</p>
         </div>
         <div class="actions">
           <button class="btn" data-action="import">Import</button>
@@ -25,19 +25,20 @@
 
       <section class="hero card">
         <div>
-          <p class="eyebrow">Leads board</p>
+          <p class="eyebrow">Lead qualification board</p>
           <h2 data-role="board-title"></h2>
           <p data-role="board-subtitle"></p>
         </div>
-        <p class="accent">Freelance opportunities look better when filtered through actual fit.</p>
+        <p class="accent">See which opportunities deserve a serious proposal, which ones should move now, and what angle gives you the best shot.</p>
       </section>
 
       <section class="stats" data-role="stats"></section>
+      <section class="insights" data-role="insights"></section>
 
       <section class="controls card">
         <label>
           <span>Search</span>
-          <input type="search" data-field="search" placeholder="Search leads..." />
+          <input type="search" data-field="search" placeholder="Search leads, deliverables, and pitch notes..." />
         </label>
         <label>
           <span>Lead type</span>
@@ -54,14 +55,19 @@
         <article class="card list-panel">
           <div class="panel-head">
             <div>
-              <strong>Leads</strong>
-              <p>Sorted by signal minus friction.</p>
+              <strong>Lead board</strong>
+              <p>Ranked by fit, budget, timing, and win probability.</p>
             </div>
             <span class="chip" data-role="count"></span>
           </div>
           <div class="list" data-role="list"></div>
         </article>
         <article class="card editor-panel" data-role="editor"></article>
+      </section>
+
+      <section class="secondary">
+        <article class="card secondary-panel" data-role="secondary-primary"></article>
+        <article class="card secondary-panel" data-role="secondary-secondary"></article>
       </section>
     </div>
     <script type="module" src="./js/main.js"></script>
