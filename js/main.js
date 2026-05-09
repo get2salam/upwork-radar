@@ -338,7 +338,7 @@ function renderInsights(items) {
   refs.insights.innerHTML = cards.map((card) => `
     <article class="card insight-card">
       <p class="eyebrow">${card.label}</p>
-      <h3>${card.title}</h3>
+      <h3>${escapeHtml(card.title)}</h3>
       <p>${card.body}</p>
     </article>
   `).join('');
@@ -358,10 +358,10 @@ function renderList(items) {
   refs.list.innerHTML = items.map((item) => `
     <button class="item ${item.id === state.ui.selectedId ? 'is-selected' : ''}" type="button" data-id="${item.id}">
       <div class="item-top">
-        <strong>${item.title}</strong>
+        <strong>${escapeHtml(item.title)}</strong>
         <span class="score">${priority(item)}</span>
       </div>
-      <p>${item.deliverable}</p>
+      <p>${escapeHtml(item.deliverable)}</p>
       <div class="badge-row">
         <span class="pill ${toneForDeadline(item)}">Deadline ${formatDate(item.deadline)}</span>
         <span class="pill">${formatMoney(item.budget)}</span>
@@ -371,7 +371,7 @@ function renderList(items) {
         <span>${item.category}</span>
         <span>${item.state}</span>
         <span>Effort ${item.effort}/10</span>
-        <span>${item.hook}</span>
+        <span>${escapeHtml(item.hook)}</span>
       </div>
     </button>
   `).join('');
@@ -392,7 +392,7 @@ function renderEditor(item) {
     <div class="editor-head">
       <div>
         <p class="eyebrow">Lead editor</p>
-        <h3>${item.title}</h3>
+        <h3>${escapeHtml(item.title)}</h3>
       </div>
       <span class="score">Priority ${priority(item)}</span>
     </div>
@@ -477,7 +477,7 @@ function renderPanels() {
       ${live.slice(0, 4).map((item) => `
         <div class="mini-card">
           <div class="inline-split">
-            <strong>${item.title}</strong>
+            <strong>${escapeHtml(item.title)}</strong>
             <span class="pill ${toneForDeadline(item)}">${formatDate(item.deadline)}</span>
           </div>
           <p>${formatMoney(item.budget)} · ${item.state} · ${item.winChance}/10 win chance.</p>
@@ -491,7 +491,7 @@ function renderPanels() {
     <div class="secondary-head">
       <div>
         <p class="eyebrow">Proposal snapshot</p>
-        <h3>${item.title}</h3>
+        <h3>${escapeHtml(item.title)}</h3>
       </div>
       <span class="chip">${formatMoney(item.budget)}</span>
     </div>
@@ -501,8 +501,8 @@ function renderPanels() {
         <p>${escapeHtml(proposalOpener(item))}</p>
       </div>
       <ul class="metric-list">
-        <li><span>Primary hook</span><strong>${item.hook}</strong></li>
-        <li><span>Deliverable</span><strong>${item.deliverable}</strong></li>
+        <li><span>Primary hook</span><strong>${escapeHtml(item.hook)}</strong></li>
+        <li><span>Deliverable</span><strong>${escapeHtml(item.deliverable)}</strong></li>
         <li><span>Best next move</span><strong>${item.state === 'Applying' ? 'Finish the proposal today' : 'Shortlist and tailor the opener'}</strong></li>
       </ul>
     </div>
