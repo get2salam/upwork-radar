@@ -69,6 +69,9 @@ const refs = {
 const toastHost = (() => {
   const host = document.createElement('div');
   host.className = 'toast-host';
+  host.setAttribute('role', 'status');
+  host.setAttribute('aria-live', 'polite');
+  host.setAttribute('aria-atomic', 'true');
   document.body.appendChild(host);
   return host;
 })();
@@ -117,7 +120,8 @@ function escapeHtml(value) {
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function normalize(item = {}) {
@@ -241,6 +245,12 @@ function exportState() {
 async function importState(file) {
   const raw = await file.text();
   const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Backup must be a JSON object.');
+  }
+  if (parsed.items !== undefined && !Array.isArray(parsed.items)) {
+    throw new Error('Backup "items" must be an array.');
+  }
   commit({
     ...seedState(),
     ...parsed,
@@ -356,7 +366,7 @@ function renderList(items) {
   }
 
   refs.list.innerHTML = items.map((item) => `
-    <button class="item ${item.id === state.ui.selectedId ? 'is-selected' : ''}" type="button" data-id="${item.id}">
+    <button class="item ${item.id === state.ui.selectedId ? 'is-selected' : ''}" type="button" data-id="${item.id}" aria-pressed="${item.id === state.ui.selectedId}">
       <div class="item-top">
         <strong>${escapeHtml(item.title)}</strong>
         <span class="score">${priority(item)}</span>
@@ -571,7 +581,7 @@ document.addEventListener('change', async (event) => {
       await importState(file);
     } catch (error) {
       console.error(error);
-      showToast('Import failed.');
+      showToast(error?.message ? `Import failed: ${error.message}` : 'Import failed.');
     } finally {
       event.target.value = '';
     }
