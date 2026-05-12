@@ -124,17 +124,30 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
+function safeNumber(value, fallback, min, max) {
+  if (value === null || value === undefined || value === '') return fallback;
+  const num = Number(value);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.min(Math.max(num, min), max);
+}
+
+function safeDeadline(value, fallback) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return fallback;
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? fallback : value;
+}
+
 function normalize(item = {}) {
   return {
     id: item.id || uid(),
     title: item.title || 'New lead',
     category: CONFIG.categories.includes(item.category) ? item.category : CONFIG.categories[0],
     state: CONFIG.states.includes(item.state) ? item.state : CONFIG.states[0],
-    score: Number(item.score ?? 7),
-    effort: Number(item.effort ?? 3),
-    winChance: Number(item.winChance ?? 5),
-    budget: Number(item.budget ?? 1000),
-    deadline: item.deadline || todayISO(3),
+    score: safeNumber(item.score, 7, 1, 10),
+    effort: safeNumber(item.effort, 3, 1, 10),
+    winChance: safeNumber(item.winChance, 5, 1, 10),
+    budget: safeNumber(item.budget, 1000, 0, Number.MAX_SAFE_INTEGER),
+    deadline: safeDeadline(item.deadline, todayISO(3)),
     deliverable: item.deliverable || 'Key deliverable or scope',
     hook: item.hook || 'Why you are a strong fit for this opportunity.',
     note: item.note || 'Capture the angle, risk, and next move before you write the proposal.',
