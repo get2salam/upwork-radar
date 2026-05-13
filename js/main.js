@@ -157,7 +157,8 @@ function normalize(item = {}) {
 function priority(item) {
   const deadlineBoost = Math.max(0, 4 - Math.max(daysFromToday(item.deadline), 0)) * 5;
   const stateBoost = item.state === 'Applying' ? 10 : item.state === 'Shortlisted' ? 6 : item.state === 'Seen' ? 2 : -12;
-  return item.score * 6 + item.winChance * 5 + Math.round(item.budget / 250) + deadlineBoost + stateBoost - item.effort * 4;
+  const budgetBoost = Math.min(Math.round(item.budget / 250), 40);
+  return item.score * 6 + item.winChance * 5 + budgetBoost + deadlineBoost + stateBoost - item.effort * 4;
 }
 
 function seedState() {
@@ -273,8 +274,15 @@ async function importState(file) {
   showToast('Imported backup.');
 }
 
+function cleanFragment(value, fallback) {
+  const trimmed = String(value || '').trim().replace(/[\s.,;:!?-]+$/, '');
+  return (trimmed || fallback).toLowerCase();
+}
+
 function proposalOpener(item) {
-  return `Hi, this looks like a strong fit. I would approach the ${item.deliverable.toLowerCase()} by focusing on ${item.hook.toLowerCase()} and shipping a clear first milestone quickly.`;
+  const deliverable = cleanFragment(item.deliverable, 'the engagement');
+  const hook = cleanFragment(item.hook, 'a focused first milestone');
+  return `Hi, this looks like a strong fit. I would approach the ${deliverable} by focusing on ${hook} and shipping a clear first milestone quickly.`;
 }
 
 async function copyProposalOpener() {
