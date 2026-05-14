@@ -33,6 +33,8 @@ Then open <http://localhost:8000>.
 
 - `N` creates a new lead
 - `/` focuses the search box
+- `↑` / `k` selects the previous lead in the board
+- `↓` / `j` selects the next lead in the board
 
 ## Data shape
 

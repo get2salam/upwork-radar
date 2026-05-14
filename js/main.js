@@ -609,6 +609,16 @@ document.addEventListener('change', async (event) => {
   }
 });
 
+function moveSelection(delta) {
+  const items = filteredItems();
+  if (!items.length) return;
+  const current = items.findIndex((item) => item.id === state.ui.selectedId);
+  const start = current === -1 ? 0 : current;
+  const next = Math.min(items.length - 1, Math.max(0, start + delta));
+  if (items[next].id === state.ui.selectedId) return;
+  commit({ ...state, ui: { ...state.ui, selectedId: items[next].id } });
+}
+
 document.addEventListener('keydown', (event) => {
   if (event.target.closest('input, textarea, select')) return;
   if (event.key.toLowerCase() === 'n') {
@@ -618,6 +628,14 @@ document.addEventListener('keydown', (event) => {
   if (event.key === '/') {
     event.preventDefault();
     refs.search.focus();
+  }
+  if (event.key === 'ArrowDown' || event.key === 'j') {
+    event.preventDefault();
+    moveSelection(1);
+  }
+  if (event.key === 'ArrowUp' || event.key === 'k') {
+    event.preventDefault();
+    moveSelection(-1);
   }
 });
 
