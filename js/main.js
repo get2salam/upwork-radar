@@ -106,6 +106,11 @@ function daysFromToday(value) {
   return Math.round((target - today) / 86400000);
 }
 
+function deadlineSortKey(item) {
+  const days = daysFromToday(item.deadline);
+  return days < 0 ? Number.MAX_SAFE_INTEGER : days;
+}
+
 function formatDate(value) {
   if (!value) return 'No date';
   return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
@@ -155,7 +160,8 @@ function normalize(item = {}) {
 }
 
 function priority(item) {
-  const deadlineBoost = Math.max(0, 4 - Math.max(daysFromToday(item.deadline), 0)) * 5;
+  const days = daysFromToday(item.deadline);
+  const deadlineBoost = days < 0 ? 0 : Math.max(0, 4 - days) * 5;
   const stateBoost = item.state === 'Applying' ? 10 : item.state === 'Shortlisted' ? 6 : item.state === 'Seen' ? 2 : -12;
   const budgetBoost = Math.min(Math.round(item.budget / 250), 40);
   return item.score * 6 + item.winChance * 5 + budgetBoost + deadlineBoost + stateBoost - item.effort * 4;
@@ -200,7 +206,7 @@ function filteredItems() {
     .filter((item) => state.ui.category === 'all' || item.category === state.ui.category)
     .filter((item) => state.ui.status === 'all' || item.state === state.ui.status)
     .filter((item) => !query || `${item.title} ${item.note} ${item.category} ${item.state} ${item.deliverable} ${item.hook}`.toLowerCase().includes(query))
-    .sort((a, b) => priority(b) - priority(a) || daysFromToday(a.deadline) - daysFromToday(b.deadline));
+    .sort((a, b) => priority(b) - priority(a) || deadlineSortKey(a) - deadlineSortKey(b));
 }
 
 function selectedItem() {
@@ -346,7 +352,7 @@ function renderStats(items) {
 }
 
 function renderInsights(items) {
-  const soonest = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => daysFromToday(a.deadline) - daysFromToday(b.deadline))[0];
+  const soonest = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => deadlineSortKey(a) - deadlineSortKey(b))[0];
   const biggest = [...state.items].sort((a, b) => b.budget - a.budget)[0];
   const strongest = items[0];
   const cards = [
@@ -495,7 +501,7 @@ function renderEditor(item) {
 }
 
 function renderPanels() {
-  const live = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => daysFromToday(a.deadline) - daysFromToday(b.deadline) || priority(b) - priority(a));
+  const live = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => deadlineSortKey(a) - deadlineSortKey(b) || priority(b) - priority(a));
   refs.secondaryPrimary.innerHTML = `
     <div class="secondary-head">
       <div>
