@@ -551,6 +551,28 @@ function renderPanels() {
   `;
 }
 
+function captureEditorFocus() {
+  const active = document.activeElement;
+  if (!active || !refs.editor.contains(active)) return null;
+  const field = active.dataset.itemField;
+  if (!field) return null;
+  return {
+    field,
+    start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+    end: typeof active.selectionEnd === 'number' ? active.selectionEnd : null,
+  };
+}
+
+function restoreEditorFocus(snapshot) {
+  if (!snapshot) return;
+  const target = refs.editor.querySelector(`[data-item-field="${snapshot.field}"]`);
+  if (!target) return;
+  target.focus();
+  if (snapshot.start !== null && snapshot.end !== null && typeof target.setSelectionRange === 'function') {
+    try { target.setSelectionRange(snapshot.start, snapshot.end); } catch (error) { /* range API not supported on this control */ }
+  }
+}
+
 function render() {
   refs.boardTitle.textContent = state.boardTitle;
   refs.boardSubtitle.textContent = state.boardSubtitle;
@@ -562,7 +584,9 @@ function render() {
   renderStats(items);
   renderInsights(items);
   renderList(items);
+  const editorFocus = captureEditorFocus();
   renderEditor(selectedItem());
+  restoreEditorFocus(editorFocus);
   renderPanels();
 }
 
