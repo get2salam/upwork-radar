@@ -651,19 +651,26 @@ function moveSelection(delta) {
 
 document.addEventListener('keydown', (event) => {
   if (event.target.closest('input, textarea, select')) return;
-  if (event.key.toLowerCase() === 'n') {
+  // Skip when modifier keys are held so we never hijack browser shortcuts
+  // like Cmd+N (new window), Cmd+J (downloads), or Cmd+K (focus URL bar).
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  const key = event.key;
+  if (key === 'n' || key === 'N') {
     event.preventDefault();
     addItem();
+    return;
   }
-  if (event.key === '/') {
+  if (key === '/') {
     event.preventDefault();
     refs.search.focus();
+    return;
   }
-  if (event.key === 'ArrowDown' || event.key === 'j') {
+  if (key === 'ArrowDown' || key === 'j' || key === 'J') {
     event.preventDefault();
     moveSelection(1);
+    return;
   }
-  if (event.key === 'ArrowUp' || event.key === 'k') {
+  if (key === 'ArrowUp' || key === 'k' || key === 'K') {
     event.preventDefault();
     moveSelection(-1);
   }
