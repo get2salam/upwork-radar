@@ -412,6 +412,10 @@ function renderList(items) {
       </div>
     </button>
   `).join('');
+
+  // Keep the active lead in view when keyboard navigation moves it past the
+  // visible window; block: 'nearest' is a no-op when it is already in range.
+  refs.list.querySelector('.item.is-selected')?.scrollIntoView({ block: 'nearest' });
 }
 
 function renderEditor(item) {
@@ -649,6 +653,14 @@ function moveSelection(delta) {
   commit({ ...state, ui: { ...state.ui, selectedId: items[next].id } });
 }
 
+function jumpSelection(position) {
+  const items = filteredItems();
+  if (!items.length) return;
+  const target = position === 'end' ? items[items.length - 1] : items[0];
+  if (target.id === state.ui.selectedId) return;
+  commit({ ...state, ui: { ...state.ui, selectedId: target.id } });
+}
+
 document.addEventListener('keydown', (event) => {
   if (event.target.closest('input, textarea, select')) return;
   // Skip when modifier keys are held so we never hijack browser shortcuts
@@ -673,6 +685,16 @@ document.addEventListener('keydown', (event) => {
   if (key === 'ArrowUp' || key === 'k' || key === 'K') {
     event.preventDefault();
     moveSelection(-1);
+    return;
+  }
+  if (key === 'Home' || key === 'g') {
+    event.preventDefault();
+    jumpSelection('start');
+    return;
+  }
+  if (key === 'End' || key === 'G') {
+    event.preventDefault();
+    jumpSelection('end');
   }
 });
 

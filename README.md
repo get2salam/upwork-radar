@@ -35,6 +35,10 @@ Then open <http://localhost:8000>.
 - `/` focuses the search box
 - `↑` / `k` selects the previous lead in the board
 - `↓` / `j` selects the next lead in the board
+- `Home` / `g` jumps to the top of the board
+- `End` / `G` jumps to the bottom of the board
+
+The board scrolls to keep the active lead in view as you navigate.
 
 ## Data shape
 
