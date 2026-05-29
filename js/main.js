@@ -662,6 +662,19 @@ function jumpSelection(position) {
 }
 
 document.addEventListener('keydown', (event) => {
+  // Escape always exits the active text field: clear-and-blur for the search
+  // box, plain blur for editor fields so users can return to board shortcuts.
+  if (event.key === 'Escape' && event.target.closest('input, textarea, select')) {
+    if (event.target === refs.search) {
+      event.preventDefault();
+      if (state.ui.search) commit({ ...state, ui: { ...state.ui, search: '' } });
+      refs.search.blur();
+    } else if (refs.editor.contains(event.target)) {
+      event.preventDefault();
+      event.target.blur();
+    }
+    return;
+  }
   if (event.target.closest('input, textarea, select')) return;
   // Skip when modifier keys are held so we never hijack browser shortcuts
   // like Cmd+N (new window), Cmd+J (downloads), or Cmd+K (focus URL bar).

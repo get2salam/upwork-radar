@@ -37,6 +37,7 @@ Then open <http://localhost:8000>.
 - `↓` / `j` selects the next lead in the board
 - `Home` / `g` jumps to the top of the board
 - `End` / `G` jumps to the bottom of the board
+- `Esc` clears the search box or exits the lead editor
 
 The board scrolls to keep the active lead in view as you navigate.
 
