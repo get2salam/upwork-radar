@@ -1,3 +1,15 @@
+import {
+  cleanFragment,
+  daysFromToday,
+  deadlineSortKey,
+  priority,
+  proposalOpener,
+  safeDeadline,
+  safeNumber,
+  todayISO,
+  toneForDeadline,
+} from './lead-engine.js';
+
 const CONFIG = {
   slug: 'upwork-radar',
   title: 'Upwork Radar',
@@ -92,25 +104,6 @@ function uid() {
   return `${CONFIG.slug}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function todayISO(offset = 0) {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() + offset);
-  return date.toISOString().slice(0, 10);
-}
-
-function daysFromToday(value) {
-  if (!value) return 999;
-  const today = new Date(`${todayISO()}T00:00:00`);
-  const target = new Date(`${value}T00:00:00`);
-  return Math.round((target - today) / 86400000);
-}
-
-function deadlineSortKey(item) {
-  const days = daysFromToday(item.deadline);
-  return days < 0 ? Number.MAX_SAFE_INTEGER : days;
-}
-
 function formatDate(value) {
   if (!value) return 'No date';
   return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
@@ -129,19 +122,6 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
-function safeNumber(value, fallback, min, max) {
-  if (value === null || value === undefined || value === '') return fallback;
-  const num = Number(value);
-  if (!Number.isFinite(num)) return fallback;
-  return Math.min(Math.max(num, min), max);
-}
-
-function safeDeadline(value, fallback) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return fallback;
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? fallback : value;
-}
-
 function normalize(item = {}) {
   return {
     id: item.id || uid(),
@@ -157,14 +137,6 @@ function normalize(item = {}) {
     hook: item.hook || 'Why you are a strong fit for this opportunity.',
     note: item.note || 'Capture the angle, risk, and next move before you write the proposal.',
   };
-}
-
-function priority(item) {
-  const days = daysFromToday(item.deadline);
-  const deadlineBoost = days < 0 ? 0 : Math.max(0, 4 - days) * 5;
-  const stateBoost = item.state === 'Applying' ? 10 : item.state === 'Shortlisted' ? 6 : item.state === 'Seen' ? 2 : -12;
-  const budgetBoost = Math.min(Math.round(item.budget / 250), 40);
-  return item.score * 6 + item.winChance * 5 + budgetBoost + deadlineBoost + stateBoost - item.effort * 4;
 }
 
 function seedState() {
@@ -280,17 +252,6 @@ async function importState(file) {
   showToast('Imported backup.');
 }
 
-function cleanFragment(value, fallback) {
-  const trimmed = String(value || '').trim().replace(/[\s.,;:!?-]+$/, '');
-  return (trimmed || fallback).toLowerCase();
-}
-
-function proposalOpener(item) {
-  const deliverable = cleanFragment(item.deliverable, 'the engagement');
-  const hook = cleanFragment(item.hook, 'a focused first milestone');
-  return `Hi, this looks like a strong fit. I would approach the ${deliverable} by focusing on ${hook} and shipping a clear first milestone quickly.`;
-}
-
 async function copyProposalOpener() {
   const target = selectedItem();
   if (!target) return;
@@ -321,13 +282,6 @@ function markPassed() {
     items: state.items.map((item) => item.id === target.id ? { ...item, state: 'Passed' } : item),
   });
   showToast('Marked lead as passed.');
-}
-
-function toneForDeadline(item) {
-  const days = daysFromToday(item.deadline);
-  if (days <= 1) return 'danger';
-  if (days <= 3) return 'warn';
-  return 'success';
 }
 
 function renderStats(items) {

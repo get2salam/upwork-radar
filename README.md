@@ -61,6 +61,16 @@ The board scrolls to keep the active lead in view as you navigate.
 }
 ```
 
+## Local checks
+
+The scoring and proposal helpers live in `js/lead-engine.js` and have a `node:test` suite. Run it with any modern Node (no install step, no dependencies):
+
+```bash
+node --test tests/lead-engine.test.mjs
+```
+
+The same command runs in CI on every push and pull request.
+
 ## Privacy
 
 Everything stays in your browser unless you export a JSON backup.
