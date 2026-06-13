@@ -12,7 +12,12 @@ export function safeNumber(value, fallback, min, max) {
 export function safeDeadline(value, fallback) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return fallback;
   const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? fallback : value;
+  if (Number.isNaN(date.getTime())) return fallback;
+  const [year, month, day] = value.split('-').map(Number);
+  const isRealCalendarDay = date.getFullYear() === year
+    && date.getMonth() + 1 === month
+    && date.getDate() === day;
+  return isRealCalendarDay ? value : fallback;
 }
 
 export function todayISO(offset = 0, now = new Date()) {
@@ -29,6 +34,7 @@ export function todayISO(offset = 0, now = new Date()) {
 
 export function daysFromToday(value, now = new Date()) {
   if (!value) return 999;
+  if (safeDeadline(value, '') !== value) return 999;
   const today = new Date(`${todayISO(0, now)}T00:00:00`);
   const target = new Date(`${value}T00:00:00`);
   return Math.round((target - today) / 86400000);

@@ -47,6 +47,9 @@ test('safeDeadline accepts ISO dates and rejects everything else', () => {
   assert.equal(safeDeadline('not-a-date', '2026-01-01'), '2026-01-01');
   assert.equal(safeDeadline('2026/06/15', '2026-01-01'), '2026-01-01');
   assert.equal(safeDeadline('2026-13-40', '2026-01-01'), '2026-01-01');
+  assert.equal(safeDeadline('2026-02-31', '2026-01-01'), '2026-01-01');
+  assert.equal(safeDeadline('2025-02-29', '2026-01-01'), '2026-01-01');
+  assert.equal(safeDeadline('2024-02-29', '2026-01-01'), '2024-02-29');
   assert.equal(safeDeadline(undefined, '2026-01-01'), '2026-01-01');
   assert.equal(safeDeadline(42, '2026-01-01'), '2026-01-01');
 });
@@ -63,6 +66,11 @@ test('daysFromToday measures whole-day deltas around the fixed now', () => {
   assert.equal(daysFromToday('2026-06-08', NOW), -2);
   assert.equal(daysFromToday('', NOW), 999);
   assert.equal(daysFromToday(undefined, NOW), 999);
+});
+
+test('daysFromToday treats impossible calendar dates as unscheduled', () => {
+  assert.equal(daysFromToday('2026-02-31', NOW), 999);
+  assert.equal(daysFromToday('2025-02-29', NOW), 999);
 });
 
 test('deadlineSortKey pushes overdue items to the back of the queue', () => {
