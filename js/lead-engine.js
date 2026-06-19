@@ -64,6 +64,26 @@ export function priority(item, now = new Date()) {
   return item.score * 6 + item.winChance * 5 + budgetBoost + deadlineBoost + stateBoost - item.effort * 4;
 }
 
+export function rankLeads(items, { mode = 'priority', now = new Date() } = {}) {
+  const decorated = [...items].map((item, index) => ({
+    item,
+    index,
+    priorityScore: priority(item, now),
+    deadlineKey: deadlineSortKey(item, now),
+  }));
+  const sorted = decorated.sort((a, b) => {
+    if (mode === 'deadline') {
+      return a.deadlineKey - b.deadlineKey
+        || b.priorityScore - a.priorityScore
+        || a.index - b.index;
+    }
+    return b.priorityScore - a.priorityScore
+      || a.deadlineKey - b.deadlineKey
+      || a.index - b.index;
+  });
+  return sorted.map(({ item }) => item);
+}
+
 export function toneForDeadline(item, now = new Date()) {
   const days = daysFromToday(item.deadline, now);
   if (days <= 1) return 'danger';

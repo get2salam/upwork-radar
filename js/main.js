@@ -1,9 +1,9 @@
 import {
   cleanFragment,
   daysFromToday,
-  deadlineSortKey,
   priority,
   proposalOpener,
+  rankLeads,
   safeDeadline,
   safeNumber,
   todayISO,
@@ -177,12 +177,11 @@ function filteredItems() {
   return [...state.items]
     .filter((item) => state.ui.category === 'all' || item.category === state.ui.category)
     .filter((item) => state.ui.status === 'all' || item.state === state.ui.status)
-    .filter((item) => !query || `${item.title} ${item.note} ${item.category} ${item.state} ${item.deliverable} ${item.hook}`.toLowerCase().includes(query))
-    .sort((a, b) => priority(b) - priority(a) || deadlineSortKey(a) - deadlineSortKey(b));
+    .filter((item) => !query || `${item.title} ${item.note} ${item.category} ${item.state} ${item.deliverable} ${item.hook}`.toLowerCase().includes(query));
 }
 
 function selectedItem() {
-  return state.items.find((item) => item.id === state.ui.selectedId) || filteredItems()[0] || null;
+  return state.items.find((item) => item.id === state.ui.selectedId) || rankLeads(filteredItems())[0] || null;
 }
 
 function commit(nextState) {
@@ -306,7 +305,7 @@ function renderStats(items) {
 }
 
 function renderInsights(items) {
-  const soonest = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => deadlineSortKey(a) - deadlineSortKey(b))[0];
+  const soonest = rankLeads(state.items.filter((item) => item.state !== 'Passed'), { mode: 'deadline' })[0];
   const biggest = [...state.items].sort((a, b) => b.budget - a.budget)[0];
   const strongest = items[0];
   const cards = [
@@ -459,7 +458,7 @@ function renderEditor(item) {
 }
 
 function renderPanels() {
-  const live = [...state.items].filter((item) => item.state !== 'Passed').sort((a, b) => deadlineSortKey(a) - deadlineSortKey(b) || priority(b) - priority(a));
+  const live = rankLeads(state.items.filter((item) => item.state !== 'Passed'), { mode: 'deadline' });
   refs.secondaryPrimary.innerHTML = `
     <div class="secondary-head">
       <div>
@@ -537,7 +536,7 @@ function render() {
   refs.search.value = state.ui.search;
   refs.category.innerHTML = `<option value="all">All types</option>${CONFIG.categories.map((entry) => `<option value="${entry}" ${state.ui.category === entry ? 'selected' : ''}>${entry}</option>`).join('')}`;
   refs.status.innerHTML = `<option value="all">All statuses</option>${CONFIG.states.map((entry) => `<option value="${entry}" ${state.ui.status === entry ? 'selected' : ''}>${entry}</option>`).join('')}`;
-  const items = filteredItems();
+  const items = rankLeads(filteredItems());
   if (!items.some((item) => item.id === state.ui.selectedId)) state.ui.selectedId = items[0]?.id || null;
   renderStats(items);
   renderInsights(items);
@@ -598,7 +597,7 @@ document.addEventListener('change', async (event) => {
 });
 
 function moveSelection(delta) {
-  const items = filteredItems();
+  const items = rankLeads(filteredItems());
   if (!items.length) return;
   const current = items.findIndex((item) => item.id === state.ui.selectedId);
   const start = current === -1 ? 0 : current;
@@ -608,7 +607,7 @@ function moveSelection(delta) {
 }
 
 function jumpSelection(position) {
-  const items = filteredItems();
+  const items = rankLeads(filteredItems());
   if (!items.length) return;
   const target = position === 'end' ? items[items.length - 1] : items[0];
   if (target.id === state.ui.selectedId) return;

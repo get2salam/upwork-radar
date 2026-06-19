@@ -7,6 +7,7 @@ import {
   deadlineSortKey,
   priority,
   proposalOpener,
+  rankLeads,
   safeDeadline,
   safeNumber,
   todayISO,
@@ -149,4 +150,34 @@ test('priority matches the documented formula exactly for a known input', () => 
   //   - effort 4*4 = 16
   // = 54 + 40 + 13 + 10 + 10 - 16 = 111
   assert.equal(priority(item, NOW), 111);
+});
+
+test('rankLeads orders by priority without mutating the source list', () => {
+  const weak = makeItem({ title: 'Weak passed lead', state: 'Passed', score: 3, winChance: 2, budget: 200, effort: 6, deadline: '2026-06-30' });
+  const urgent = makeItem({ title: 'Urgent strong lead', state: 'Applying', score: 9, winChance: 8, budget: 4000, effort: 3, deadline: '2026-06-11' });
+  const steady = makeItem({ title: 'Steady shortlist', state: 'Shortlisted', score: 7, winChance: 6, budget: 1500, effort: 3, deadline: '2026-06-15' });
+  const source = [weak, steady, urgent];
+
+  assert.deepEqual(rankLeads(source, { now: NOW }).map((item) => item.title), [
+    'Urgent strong lead',
+    'Steady shortlist',
+    'Weak passed lead',
+  ]);
+  assert.deepEqual(source.map((item) => item.title), [
+    'Weak passed lead',
+    'Steady shortlist',
+    'Urgent strong lead',
+  ]);
+});
+
+test('rankLeads can prioritize the deadline queue while pushing bad dates last', () => {
+  const invalid = makeItem({ title: 'Broken deadline', deadline: '2026-02-31', state: 'Applying', score: 10, winChance: 10 });
+  const later = makeItem({ title: 'Later live lead', deadline: '2026-06-14', score: 8 });
+  const sooner = makeItem({ title: 'Sooner live lead', deadline: '2026-06-11', score: 6 });
+
+  assert.deepEqual(rankLeads([invalid, later, sooner], { mode: 'deadline', now: NOW }).map((item) => item.title), [
+    'Sooner live lead',
+    'Later live lead',
+    'Broken deadline',
+  ]);
 });
