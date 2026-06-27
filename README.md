@@ -61,6 +61,24 @@ The board scrolls to keep the active lead in view as you navigate.
 }
 ```
 
+## Scoring preview
+
+See how the ranking engine orders a sample board without opening a browser:
+
+```bash
+node examples/score-leads.mjs
+```
+
+To rank your own data, export a board backup and pass the file path:
+
+```bash
+node examples/score-leads.mjs --file my-backup.json
+```
+
+The script accepts either a bare JSON array or the full export object (with an
+`items` key) and prints a ranked table showing priority, budget, deadline, and
+status for every lead. No install step, no dependencies.
+
 ## Local checks
 
 The scoring and proposal helpers live in `js/lead-engine.js` and have a `node:test` suite. Run it with any modern Node (no install step, no dependencies):
