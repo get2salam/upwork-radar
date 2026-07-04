@@ -5,6 +5,7 @@ import {
   cleanFragment,
   daysFromToday,
   deadlineSortKey,
+  nextAction,
   priority,
   proposalOpener,
   rankLeads,
@@ -168,6 +169,42 @@ test('rankLeads orders by priority without mutating the source list', () => {
     'Steady shortlist',
     'Urgent strong lead',
   ]);
+});
+
+test('nextAction archives passed leads regardless of other signals', () => {
+  assert.equal(
+    nextAction(makeItem({ state: 'Passed', score: 10, winChance: 10, deadline: '2026-06-11' }), NOW),
+    'Archived — no action needed.',
+  );
+});
+
+test('nextAction escalates applying leads by how close the deadline is', () => {
+  assert.equal(nextAction(makeItem({ state: 'Applying', deadline: '2026-06-05' }), NOW), 'Follow up — the listed deadline has already passed.');
+  assert.equal(nextAction(makeItem({ state: 'Applying', deadline: '2026-06-11' }), NOW), 'Send the proposal today — the deadline is imminent.');
+  assert.equal(nextAction(makeItem({ state: 'Applying', deadline: '2026-06-25' }), NOW), 'Finish and submit the proposal.');
+});
+
+test('nextAction flags weak fit before deadline-driven advice, even if shortlisted', () => {
+  assert.equal(
+    nextAction(makeItem({ state: 'Shortlisted', score: 2, winChance: 8, deadline: '2026-06-11' }), NOW),
+    'Reconsider — weak fit signal, pass unless something changes.',
+  );
+  assert.equal(
+    nextAction(makeItem({ state: 'Shortlisted', score: 8, winChance: 2, deadline: '2026-06-25' }), NOW),
+    'Reconsider — weak fit signal, pass unless something changes.',
+  );
+});
+
+test('nextAction pushes strong shortlisted leads toward applying as the deadline nears', () => {
+  assert.equal(nextAction(makeItem({ state: 'Shortlisted', deadline: '2026-06-11' }), NOW), 'Move to applying — the deadline window is closing.');
+  assert.equal(nextAction(makeItem({ state: 'Shortlisted', deadline: '2026-06-25' }), NOW), 'Draft a proposal angle before the deadline gets close.');
+});
+
+test('nextAction defaults seen leads to a fit review', () => {
+  assert.equal(
+    nextAction(makeItem({ state: 'Seen', deadline: '2026-06-25' }), NOW),
+    'Review the fit and shortlist it if the deliverable matches your strengths.',
+  );
 });
 
 test('rankLeads can prioritize the deadline queue while pushing bad dates last', () => {

@@ -11,6 +11,7 @@ Upwork Radar is a local-first opportunity board for freelancers who want to qual
 - ranks freelance leads by fit, budget, deadline pressure, and effort
 - tracks **budget**, **deadline**, **win chance**, **deliverable**, and **proposal angle** for each lead
 - highlights the strongest current bet, the closest deadline, and the largest opportunity
+- suggests a concrete **next action** per lead (submit, follow up, shortlist, or pass) from its state, deadline pressure, and fit signal
 - includes quick actions for moving a lead into applying, copying a proposal opener, and marking low-value jobs as passed
 - renders a deadline queue and proposal snapshot beneath the main board
 - saves locally in the browser with JSON import/export backups

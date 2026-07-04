@@ -90,3 +90,28 @@ export function toneForDeadline(item, now = new Date()) {
   if (days <= 3) return 'warn';
   return 'success';
 }
+
+// Deterministic next-step policy: turns lead state, deadline pressure, and
+// fit signal into one concrete instruction instead of leaving the user to
+// re-derive "what do I do with this lead" from the raw fields every time.
+export function nextAction(item, now = new Date()) {
+  const days = daysFromToday(item.deadline, now);
+  const lowFit = item.winChance <= 3 || item.score <= 3;
+
+  if (item.state === 'Passed') return 'Archived — no action needed.';
+
+  if (item.state === 'Applying') {
+    if (days < 0) return 'Follow up — the listed deadline has already passed.';
+    if (days <= 1) return 'Send the proposal today — the deadline is imminent.';
+    return 'Finish and submit the proposal.';
+  }
+
+  if (lowFit) return 'Reconsider — weak fit signal, pass unless something changes.';
+
+  if (item.state === 'Shortlisted') {
+    if (days <= 3) return 'Move to applying — the deadline window is closing.';
+    return 'Draft a proposal angle before the deadline gets close.';
+  }
+
+  return 'Review the fit and shortlist it if the deliverable matches your strengths.';
+}

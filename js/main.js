@@ -1,6 +1,7 @@
 import {
   cleanFragment,
   daysFromToday,
+  nextAction,
   priority,
   proposalOpener,
   rankLeads,
@@ -497,7 +498,7 @@ function renderPanels() {
       <ul class="metric-list">
         <li><span>Primary hook</span><strong>${escapeHtml(item.hook)}</strong></li>
         <li><span>Deliverable</span><strong>${escapeHtml(item.deliverable)}</strong></li>
-        <li><span>Best next move</span><strong>${item.state === 'Applying' ? 'Finish the proposal today' : 'Shortlist and tailor the opener'}</strong></li>
+        <li><span>Best next move</span><strong>${escapeHtml(nextAction(item))}</strong></li>
       </ul>
     </div>
   ` : `
