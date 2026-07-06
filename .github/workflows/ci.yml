@@ -21,4 +21,4 @@ jobs:
           node --check js/lead-engine.js
           node --check js/main.js
       - name: Run unit tests
-        run: node --test tests/lead-engine.test.mjs
+        run: node --test tests/*.test.mjs

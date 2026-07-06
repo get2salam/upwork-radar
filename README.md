@@ -82,10 +82,12 @@ status for every lead. No install step, no dependencies.
 
 ## Local checks
 
-The scoring and proposal helpers live in `js/lead-engine.js` and have a `node:test` suite. Run it with any modern Node (no install step, no dependencies):
+The scoring and proposal helpers live in `js/lead-engine.js`, and the offline scoring
+preview's bad-input handling lives in `tests/score-leads.test.mjs`. Run the full
+`node:test` suite with any modern Node (no install step, no dependencies):
 
 ```bash
-node --test tests/lead-engine.test.mjs
+node --test tests/*.test.mjs
 ```
 
 The same command runs in CI on every push and pull request.

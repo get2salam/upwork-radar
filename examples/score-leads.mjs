@@ -58,14 +58,35 @@ const SAMPLE = [
   },
 ];
 
+function fail(message) {
+  console.error(`score-leads: ${message}`);
+  process.exit(1);
+}
+
 function loadLeads() {
   const flagIndex = process.argv.indexOf('--file');
-  if (flagIndex !== -1 && process.argv[flagIndex + 1]) {
-    const raw = readFileSync(process.argv[flagIndex + 1], 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : (parsed.items ?? []);
+  if (flagIndex === -1 || !process.argv[flagIndex + 1]) return SAMPLE;
+  const filePath = process.argv[flagIndex + 1];
+
+  let raw;
+  try {
+    raw = readFileSync(filePath, 'utf8');
+  } catch (err) {
+    return fail(`could not read "${filePath}" (${err.code === 'ENOENT' ? 'file not found' : err.message}).`);
   }
-  return SAMPLE;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return fail(`"${filePath}" is not valid JSON.`);
+  }
+
+  const items = Array.isArray(parsed) ? parsed : parsed?.items;
+  if (!Array.isArray(items)) {
+    return fail(`"${filePath}" must be a JSON array of leads or an object with an "items" array.`);
+  }
+  return items;
 }
 
 function fmtBudget(n) {
